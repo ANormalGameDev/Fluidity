@@ -18,6 +18,10 @@ class TestWindow : public Fluidity::FluidWindow {
                 SetTimeScale(-1);
             }
             if (FrameCounter == 85) {
+                std::cout << "freeze!\n";
+                SetTimeScale(0);
+            }
+            if (FrameCounter == 115) {
                 std::cout << "reverse!\n";
                 SetTimeScale(1);
             }

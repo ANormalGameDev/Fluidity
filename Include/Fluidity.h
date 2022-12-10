@@ -57,6 +57,7 @@ namespace Fluidity {
             Animation CurrentAnimation;
             size_t KeyframeIndex;
             float ElapsedTime;
+            bool TimeFrozen;
             int TimeScale;
 
             bool OnAnimationTick();

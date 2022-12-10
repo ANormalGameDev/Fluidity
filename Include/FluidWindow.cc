@@ -1,15 +1,19 @@
 #include "Fluidity.h"
-#include <iostream>
 
 Fluidity::FluidWindow::FluidWindow() {
-    KeyframeIndex = ElapsedTime = 0;
+    TimeFrozen = KeyframeIndex = ElapsedTime = 0;
     TimeScale = 1;
     Start();
 }
 
 
 bool Fluidity::FluidWindow::OnAnimationTick() {
-    if (TimeScale >= 0 ? (KeyframeIndex == CurrentAnimation.CountKeyframes() - 1) : (KeyframeIndex == 0)) {
+    // Call the callback function when a frame is started
+    OnFrameStarted();
+
+    if (TimeFrozen == true) return true;
+
+    if (TimeScale > 0 ? (KeyframeIndex == CurrentAnimation.CountKeyframes() - 1) : (KeyframeIndex == 0)) {
         // Mark Current Animation as Completed
         ElapsedTime = KeyframeIndex = 0;
         CurrentAnimation = Animation();
@@ -18,14 +22,11 @@ bool Fluidity::FluidWindow::OnAnimationTick() {
         return false;
     }
 
-    // Call the callback function when a frame is started
-    OnFrameStarted();
-
-    Keyframe NextFrame = CurrentAnimation[KeyframeIndex + (TimeScale == -1 ? -1 : 1)];
+    Keyframe NextFrame = CurrentAnimation[KeyframeIndex + (TimeScale)];
     Keyframe LastFrame = CurrentAnimation[KeyframeIndex];
 
     // Make Time Progress
-    ElapsedTime += TimeScale == 0 ? 0 : float(1)/(TimeScale > 0 ? NextFrame : LastFrame).Duration;
+    ElapsedTime += float(1)/(TimeScale > 0 ? NextFrame : LastFrame).Duration;
 
     if (ElapsedTime > 1) {
         // Mark Current Keyframe as Completed
@@ -35,7 +36,7 @@ bool Fluidity::FluidWindow::OnAnimationTick() {
 
     // Interpolate to the Next Frame
     LastFrame = CurrentAnimation[KeyframeIndex];
-    if (TimeScale >= 0)
+    if (TimeScale > 0)
         move(NextFrame.InterpolateXFrom(LastFrame.X, ElapsedTime), NextFrame.InterpolateYFrom(LastFrame.Y, ElapsedTime));
     else
         move(LastFrame.InterpolateXTo(NextFrame.X, ElapsedTime), LastFrame.InterpolateYTo(NextFrame.Y, ElapsedTime));
@@ -54,7 +55,7 @@ size_t Fluidity::FluidWindow::GetCurrentKeyframeIndex() {
 }
 
 int Fluidity::FluidWindow::GetTimeScale() {
-    return TimeScale;
+    return (TimeFrozen ? 0 : TimeScale);
 }
 
 
@@ -66,9 +67,12 @@ void Fluidity::FluidWindow::PlayAnimation(Animation _Animation) {
 }
 
 void Fluidity::FluidWindow::SetTimeScale(int _TimeScale) {
-    if (TimeScale < -1 || TimeScale > 1) std::__throw_length_error("Fluidity::FluidWindow::SetTimeScale(int)");
-    // ORIGIN OF A KNOWN BUG
-    if (TimeScale + _TimeScale == 0 || TimeScale + _TimeScale == -1) { KeyframeIndex += TimeScale; ElapsedTime = 1 - ElapsedTime; }
-    //
-    TimeScale = _TimeScale;
+    if (_TimeScale < -1 || _TimeScale > 1) std::__throw_length_error("Fluidity::FluidWindow::SetTimeScale(int)");
+    TimeFrozen = _TimeScale == 0;
+    if (TimeScale + _TimeScale == 0) {
+        // Perform necessary changes when the sign of TimeScale is changed
+        KeyframeIndex += TimeScale;
+        TimeScale = _TimeScale;
+        ElapsedTime = 1 - ElapsedTime;
+    }
 }
