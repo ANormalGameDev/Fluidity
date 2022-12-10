@@ -12,21 +12,29 @@ namespace Fluidity {
         uint X, Y;
         uint Duration;
         uint(*InterpolationFunction)(int, int, float);
+
         Keyframe(uint _X, uint _Y, uint _Duration, uint(*InterpolationFunction)(int, int, float));
-        uint InterpolateX(int Start, float ElapsedTime);
-        uint InterpolateY(int Start, float ElapsedTime);
+
+        uint InterpolateXFrom(int Start, float ElapsedTime);
+        uint InterpolateYFrom(int Start, float ElapsedTime);
+        uint InterpolateXTo(int End, float ElapsedTime);
+        uint InterpolateYTo(int End, float ElapsedTime);
     };
 
     class Animation {
         private:
-            std::vector<Keyframe> Keyframes;
             uint TickInterval;
+            std::vector<Keyframe> Keyframes;
+
         public:
-            Animation() { TickInterval = 0; }
+            Animation();
             Animation(uint16_t TickRate);
-            Animation* AddKeyframe(uint X, uint Y, uint Duration, uint(*InterpolationFunction)(int, int, float));
-            int CountKeyframes();
+
             uint GetTickInterval();
+            int CountKeyframes();
+
+            Animation* AddKeyframe(uint X, uint Y, uint Duration, uint(*InterpolationFunction)(int, int, float));
+
             Keyframe operator[](int i);
     };
 
@@ -49,10 +57,24 @@ namespace Fluidity {
             Animation CurrentAnimation;
             size_t KeyframeIndex;
             float ElapsedTime;
+            int TimeScale;
+
             bool OnAnimationTick();
+
+        protected:
+            Animation GetCurrentAnimation();
+            size_t GetCurrentKeyframeIndex();
+
+            virtual void Start() {};
+            virtual void OnFrameStarted() {};
+
         public:
             FluidWindow();
+
+            int GetTimeScale();
+
             void PlayAnimation(Animation _Animation);
+            void SetTimeScale(int _TimeScale);
     };
 }
 
