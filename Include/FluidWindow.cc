@@ -14,11 +14,18 @@ bool Fluidity::FluidWindow::OnAnimationTick() {
     if (TimeFrozen == true) return true;
 
     if (TimeScale > 0 ? (KeyframeIndex == CurrentAnimation.CountKeyframes() - 1) : (KeyframeIndex == 0)) {
-        // Mark Current Animation as Completed
-        ElapsedTime = KeyframeIndex = 0;
-        CurrentAnimation = Animation();
+        // Call the callback function when the current animation is completed
+        OnAnimationCompleted();
 
-        // Stop the ticks
+        // Mark Current Animation as Completed
+        ElapsedTime = 0;
+        KeyframeIndex = (CurrentAnimation.CountKeyframes() - 1) * (TimeScale < 0);
+        
+        // Continue the ticks if the current animation is loop
+        if (CurrentAnimation.GetLooping()) return true;
+
+        // Reset the current animation and stop the ticks if it is not looping
+        CurrentAnimation = Animation();
         return false;
     }
 
@@ -46,8 +53,8 @@ bool Fluidity::FluidWindow::OnAnimationTick() {
 }
 
 
-Fluidity::Animation Fluidity::FluidWindow::GetCurrentAnimation() {
-    return CurrentAnimation;
+Fluidity::Animation* Fluidity::FluidWindow::GetCurrentAnimation() {
+    return &CurrentAnimation;
 }
 
 size_t Fluidity::FluidWindow::GetCurrentKeyframeIndex() {

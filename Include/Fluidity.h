@@ -23,16 +23,21 @@ namespace Fluidity {
 
     class Animation {
         private:
+            std::string Name;
             uint TickInterval;
+            bool Looping;
             std::vector<Keyframe> Keyframes;
 
         public:
             Animation();
-            Animation(uint16_t TickRate);
+            Animation(std::string _Name, uint16_t TickRate);
 
+            std::string GetName();
             uint GetTickInterval();
+            bool GetLooping();
             int CountKeyframes();
 
+            Animation* SetLooping(bool _Looping);
             Animation* AddKeyframe(uint X, uint Y, uint Duration, uint(*InterpolationFunction)(int, int, float));
 
             Keyframe operator[](int i);
@@ -63,11 +68,12 @@ namespace Fluidity {
             bool OnAnimationTick();
 
         protected:
-            Animation GetCurrentAnimation();
+            Animation* GetCurrentAnimation();
             size_t GetCurrentKeyframeIndex();
 
-            virtual void Start() {};
-            virtual void OnFrameStarted() {};
+            virtual void Start() {}
+            virtual void OnFrameStarted() {}
+            virtual void OnAnimationCompleted() {}
 
         public:
             FluidWindow();
