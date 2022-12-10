@@ -32,17 +32,30 @@ uint Fluidity::Keyframe::InterpolateYTo(int End, float ElapsedTime) {
 
 Fluidity::Animation::Animation() { TickInterval = 0; }
 
-Fluidity::Animation::Animation(uint16_t TickRate) { TickInterval = 1000/TickRate; }
+Fluidity::Animation::Animation(std::string _Name, uint16_t TickRate) { Name = _Name; TickInterval = 1000/TickRate; }
 
+
+std::string Fluidity::Animation::GetName() {
+    return Name;
+}
 
 uint Fluidity::Animation::GetTickInterval() {
     return TickInterval;
+}
+
+bool Fluidity::Animation::GetLooping() {
+    return Looping;
 }
 
 int Fluidity::Animation::CountKeyframes() {
     return Keyframes.size();
 }
 
+
+Fluidity::Animation* Fluidity::Animation::SetLooping(bool _Looping) {
+    Looping = _Looping;
+    return this;
+}
 
 Fluidity::Animation* Fluidity::Animation::AddKeyframe(uint X, uint Y, uint Duration, uint(*InterpolationFunction)(int, int, float)) {
     if (Keyframes.size() == 50) std::__throw_length_error("Fluidity::Animation::AddKeyframe(uint)");
