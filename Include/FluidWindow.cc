@@ -1,7 +1,7 @@
 #include "Fluidity.h"
 
 Fluidity::FluidWindow::FluidWindow() {
-    TimeFrozen = KeyframeIndex = ElapsedTime = 0;
+    Playing = TimeFrozen = KeyframeIndex = ElapsedTime = 0;
     TimeScale = 1;
     Start();
 }
@@ -22,10 +22,17 @@ bool Fluidity::FluidWindow::OnAnimationTick() {
         KeyframeIndex = (CurrentAnimation.CountKeyframes() - 1) * (TimeScale < 0);
         
         // Continue the ticks if the current animation is loop
-        if (CurrentAnimation.GetLooping()) return true;
+        if (CurrentAnimation.IsLooping()) return true;
 
-        // Reset the current animation and stop the ticks if it is not looping
-        CurrentAnimation = Animation();
+        Playing = false;
+        if (AnimationQueue.empty()) {
+            // Stop the ticks if current animation is not looping and no animations are queued
+            return false;
+        }
+
+        // Set the current animation to the next queued animation
+        PlayAnimation(AnimationQueue.front());
+        AnimationQueue.pop();
         return false;
     }
 
@@ -61,6 +68,10 @@ size_t Fluidity::FluidWindow::GetCurrentKeyframeIndex() {
     return KeyframeIndex;
 }
 
+bool Fluidity::FluidWindow::IsPlaying() {
+    return Playing;
+}
+
 int Fluidity::FluidWindow::GetTimeScale() {
     return (TimeFrozen ? 0 : TimeScale);
 }
@@ -68,8 +79,13 @@ int Fluidity::FluidWindow::GetTimeScale() {
 
 void Fluidity::FluidWindow::PlayAnimation(Animation _Animation) {
     if (_Animation.CountKeyframes() == 0 || _Animation.GetTickInterval() == 0) return;
-    CurrentAnimation = _Animation;
+    if (Playing) {
+        AnimationQueue.push(_Animation);
+        return;
+    }
     
+    CurrentAnimation = _Animation;
+    Playing = true;
     Glib::signal_timeout().connect(sigc::mem_fun((*this), &Fluidity::FluidWindow::OnAnimationTick), _Animation.GetTickInterval());
 }
 

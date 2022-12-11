@@ -43,7 +43,11 @@ uint Fluidity::Animation::GetTickInterval() {
     return TickInterval;
 }
 
-bool Fluidity::Animation::GetLooping() {
+bool Fluidity::Animation::IsNamed(std::string _Name) {
+    return Name == _Name;
+}
+
+bool Fluidity::Animation::IsLooping() {
     return Looping;
 }
 

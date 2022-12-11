@@ -3,6 +3,7 @@
 
 #include <gtkmm-3.0/gtkmm.h>
 #include <vector>
+#include <queue>
 
 namespace Fluidity {
     // Animation.cc
@@ -34,7 +35,8 @@ namespace Fluidity {
 
             std::string GetName();
             uint GetTickInterval();
-            bool GetLooping();
+            bool IsNamed(std::string _Name);
+            bool IsLooping();
             int CountKeyframes();
 
             Animation* SetLooping(bool _Looping);
@@ -59,7 +61,9 @@ namespace Fluidity {
 
     class FluidWindow : public Gtk::Window {
         private:
+            bool Playing;
             Animation CurrentAnimation;
+            std::queue<Animation> AnimationQueue;
             size_t KeyframeIndex;
             float ElapsedTime;
             bool TimeFrozen;
@@ -78,6 +82,7 @@ namespace Fluidity {
         public:
             FluidWindow();
 
+            bool IsPlaying();
             int GetTimeScale();
 
             void PlayAnimation(Animation _Animation);
