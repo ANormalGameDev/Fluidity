@@ -18,9 +18,8 @@ class TestWindow : public Fluidity::FluidWindow {
         }
 
         void OnAnimationCompleted() {
-            std::cout << GetCurrentAnimation()->GetName() << "\n";
             LoopCounter++;
-            if (LoopCounter == 5) {
+            if (GetCurrentAnimation()->IsNamed("ExampleAnimation") && LoopCounter == 5) {
                 GetCurrentAnimation()->SetLooping(false);
             }
         }
@@ -37,6 +36,18 @@ int main(int argc, char *argv[]) {
             ->AddKeyframe(1166, 0, 20, Fluidity::Interpolation::SmootherStep)
             ->SetLooping(true);
     window.PlayAnimation(animation);
+    Fluidity::Animation animation2("ExampleAnimation2", 60);
+    animation2.AddKeyframe(500, 500, 1, Fluidity::Interpolation::Null)
+            ->AddKeyframe(500, 500, 20, Fluidity::Interpolation::Null)
+            ->AddKeyframe(0, 0, 30, Fluidity::Interpolation::SmootherStep)
+            ->AddKeyframe(800, 200, 20, Fluidity::Interpolation::SmootherStep);
+    window.PlayAnimation(animation2);
+    Fluidity::Animation animation3("ExampleAnimation3", 60);
+    animation3.AddKeyframe(200, 200, 1, Fluidity::Interpolation::Null)
+            ->AddKeyframe(200, 200, 20, Fluidity::Interpolation::Null)
+            ->AddKeyframe(1166, 568, 30, Fluidity::Interpolation::SmootherStep)
+            ->AddKeyframe(1166, 0, 20, Fluidity::Interpolation::SmootherStep);
+    window.PlayAnimation(animation3);
 
     return App->run(window);
 }
