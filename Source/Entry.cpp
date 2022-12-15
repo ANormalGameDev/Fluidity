@@ -1,53 +1,27 @@
-#include "../Include/Fluidity.h"
-#include <iostream>
+#include "../Include/Composition.h"
+#include "../Include/Math.h"
 
-class TestWindow : public Fluidity::FluidWindow {
-    private:
-        int LoopCounter;
-        int FrameCounter;
-
-    protected:
-        void Start() {
-            LoopCounter = FrameCounter = 0;
-            set_default_size(200, 200);
-        }
-
-        void OnFrameStarted() {
-            FrameCounter++;
-            if (FrameCounter == 65) SetTimeScale(-1);
-        }
-
-        void OnAnimationCompleted() {
-            LoopCounter++;
-            if (GetCurrentAnimation()->IsNamed("ExampleAnimation") && LoopCounter == 5) {
-                GetCurrentAnimation()->SetLooping(false);
-            }
-        }
-};
+using namespace Fluidity;
+using namespace Fluidity::Math;
 
 int main(int argc, char *argv[]) {
-    auto App = Gtk::Application::create(argc, argv, "ex.angd.FluidityTest");
+    auto App = Gtk::Application::create(argc, argv, "ex.angd.test");
 
-    TestWindow window;
-    Fluidity::Animation animation("ExampleAnimation", 60);
-    animation.AddKeyframe(0, 0, 1, Fluidity::Interpolation::Null)
-            ->AddKeyframe(0, 0, 20, Fluidity::Interpolation::Null)
-            ->AddKeyframe(1166, 568, 30, Fluidity::Interpolation::SmootherStep)
-            ->AddKeyframe(1166, 0, 20, Fluidity::Interpolation::SmootherStep)
-            ->SetLooping(true);
-    window.PlayAnimation(animation);
-    Fluidity::Animation animation2("ExampleAnimation2", 60);
-    animation2.AddKeyframe(500, 500, 1, Fluidity::Interpolation::Null)
-            ->AddKeyframe(500, 500, 20, Fluidity::Interpolation::Null)
-            ->AddKeyframe(0, 0, 30, Fluidity::Interpolation::SmootherStep)
-            ->AddKeyframe(800, 200, 20, Fluidity::Interpolation::SmootherStep);
-    window.PlayAnimation(animation2);
-    Fluidity::Animation animation3("ExampleAnimation3", 60);
-    animation3.AddKeyframe(200, 200, 1, Fluidity::Interpolation::Null)
-            ->AddKeyframe(200, 200, 20, Fluidity::Interpolation::Null)
-            ->AddKeyframe(1166, 568, 30, Fluidity::Interpolation::SmootherStep)
-            ->AddKeyframe(1166, 0, 20, Fluidity::Interpolation::SmootherStep);
-    window.PlayAnimation(animation3);
+    Gtk::Window window;
+    window.set_default_size(200, 200);
 
+    Animation* anim = Animation::Create("BlahBlahBlah")->From(0)->To(60);
+    anim->AddKeyframe(0)->X(1);
+    anim->AddKeyframe(10)->X(10);
+    anim->AddKeyframe(40)->X(50);
+    anim->Easing(UnorderedPair(2, 3), BezierEasing);
+
+    Animation* anim2 = Animation::Create("BlahBlahBlah2")->From(0)->To(60);
+    anim2->AddKeyframe(0)->X(1);
+    anim2->AddKeyframe(20)->X(30);
+    anim2->AddKeyframe(50)->X(50);
+    anim2->Easing(UnorderedPair(2, 3), BezierEasing);
+
+    Timeline::Create(60)->FPS(60)->AddAnim(anim)->AddAnim(anim2)->Run();
     return App->run(window);
 }
