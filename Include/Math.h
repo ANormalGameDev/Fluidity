@@ -28,6 +28,10 @@ namespace Fluidity {
         static int BezierEasing(int Start, int End, float Elapsed) {
             return Start + (End - Start) * Elapsed * Elapsed * (3 - 2 * Elapsed);
         }
+
+        static int Lerp(int Start, int End, float Elapsed) {
+            return Start + (End - Start) * Elapsed;
+        }
     }
 }
 

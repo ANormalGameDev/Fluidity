@@ -1,8 +1,12 @@
-#include "../Include/Composition.h"
-#include "../Include/Math.h"
+#include "../Include/Fluidity.h"
+#include <iostream>
 
 using namespace Fluidity;
 using namespace Fluidity::Math;
+
+void OnAnimIntDraw(int val, Animation<int>* data) {
+    std::cout << val << " " << data->Name() << "\n";
+}
 
 int main(int argc, char *argv[]) {
     auto App = Gtk::Application::create(argc, argv, "ex.angd.test");
@@ -10,18 +14,16 @@ int main(int argc, char *argv[]) {
     Gtk::Window window;
     window.set_default_size(200, 200);
 
-    Animation* anim = Animation::Create("BlahBlahBlah")->From(0)->To(60);
-    anim->AddKeyframe(0)->X(1);
-    anim->AddKeyframe(10)->X(10);
-    anim->AddKeyframe(40)->X(50);
-    anim->Easing(UnorderedPair(2, 3), BezierEasing);
+    Animation<int>* anim_int = NewAnimation<int>("anim_int1");
+    anim_int->AddKeyframe(5)->Data(40);
+    anim_int->AddKeyframe(10)->Data(50);
+    anim_int->AddKeyframe(60)->Data(120);
+    anim_int->Easing(UnorderedPair(1, 2), Lerp)
+            ->Easing(UnorderedPair(2, 3), BezierEasing);
+    anim_int->Link(&OnAnimIntDraw);
 
-    Animation* anim2 = Animation::Create("BlahBlahBlah2")->From(0)->To(60);
-    anim2->AddKeyframe(0)->X(1);
-    anim2->AddKeyframe(20)->X(30);
-    anim2->AddKeyframe(50)->X(50);
-    anim2->Easing(UnorderedPair(2, 3), BezierEasing);
+    Timeline* tl = NewTimeline(60)->FPS(60)->AddAnim(anim_int);
+    tl->Run();
 
-    Timeline::Create(60)->FPS(60)->AddAnim(anim)->AddAnim(anim2)->Run();
     return App->run(window);
 }
